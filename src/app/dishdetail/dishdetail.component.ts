@@ -62,7 +62,7 @@ export class DishdetailComponent implements OnInit {
 
       this.dishservice.getDishIds().subscribe(dishIds => this.dishIds = dishIds);
       this.route.params.pipe(switchMap((params: Params) => this.dishservice.getDish(params['id'])))
-      .subscribe(dish => { this.dish = dish; this.setPrevNext(dish.id); }, 
+      .subscribe(dish => { this.dish = dish; this.dishcopy = dish; this.setPrevNext(dish.id); }, 
         errmess => this.errMess = <any>errmess );
     }
     setPrevNext(dishId: string) {
@@ -106,17 +106,35 @@ export class DishdetailComponent implements OnInit {
     }
       
 
-    onSubmit() {
+    // onSubmit() {
      
-      comments.push( this.reviewForm.value );
-      console.log(this.reviewForm.value)
-      this.reviewForm.reset({
-        name: '',
-        rating: 5,
-        comment: '',
-        date:formatDate(new Date(), 'mediumDate', 'en')
-      });
+    //   comments.push( this.reviewForm.value );
+    //   console.log(this.reviewForm.value)
+    //   this.reviewForm.reset({
+    //     name: '',
+    //     rating: 5,
+    //     comment: '',
+    //     date:formatDate(new Date(), 'mediumDate', 'en')
+    //   });
+    //   this.reviewFormDirective.resetForm();
+    // }
+
+    onSubmit() {
+      this.comments = this.reviewForm.value;
+      this.comments.date = new Date().toISOString();
+      console.log(this.comments);
+      this.dishcopy.comments.push(this.comments);
+      this.dishservice.putDish(this.dishcopy)
+        .subscribe(dish =>{
+          this.dish =dish; this.dishcopy = dish;
+        },
+        errmess => { this.dish =null; this.dishcopy = null; this.errMess = <any>errmess; });
       this.reviewFormDirective.resetForm();
+      this.reviewForm.reset({
+        author: '',
+        rating: 5,
+        comment: ''
+      });
     }
 
   goBack(): void {
