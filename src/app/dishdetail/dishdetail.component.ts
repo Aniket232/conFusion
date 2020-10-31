@@ -6,8 +6,8 @@ import { Params, ActivatedRoute } from '@angular/router';
 import {formatDate} from '@angular/common';
 import { Location } from '@angular/common';
 import { switchMap } from 'rxjs/operators';
-import { Comments} from '../shared/comments';
-import { trigger, state, style, animate, transition, animation } from '@angular/animations';
+import { Comment} from '../shared/comment';
+import { visibility, flyInOut, expand } from '../animations/app.animation';
 
 const comments = [];
 
@@ -15,19 +15,15 @@ const comments = [];
   selector: 'app-dishdetail',
   templateUrl: './dishdetail.component.html',
   styleUrls: ['./dishdetail.component.scss'],
-  animations: [
-    trigger('visibility', [
-      state('shown', style({
-        transform: 'scale(1.0)',
-        opacity: 1
-      })),
-      state('hidden', style({
-        transform: 'scale(0.5)',
-        opacity: 0
-      })),
-      transition('* => *', animate('0.5s ease-in-out'))
-    ])
-  ]
+  host: {
+    '[@flyInOut]': 'true',
+    'style': 'display: block;'
+    },
+    animations: [
+      flyInOut(),
+      visibility(),
+      expand()
+    ]
 })
 export class DishdetailComponent implements OnInit {
 
@@ -37,7 +33,7 @@ export class DishdetailComponent implements OnInit {
   prev: string;
   next: string;
   reviewForm: FormGroup;
-  comments: Comments;
+  comment: Comment;
   dishcopy: Dish;
   visibility = 'shown';
  
@@ -133,10 +129,10 @@ export class DishdetailComponent implements OnInit {
     // }
 
     onSubmit() {
-      this.comments = this.reviewForm.value;
-      this.comments.date = new Date().toISOString();
-      console.log(this.comments);
-      this.dishcopy.comments.push(this.comments);
+      this.comment = this.reviewForm.value;
+      this.comment.date = new Date().toISOString();
+      console.log(this.comment);
+      this.dishcopy.comments.push(this.comment);
       this.dishservice.putDish(this.dishcopy)
         .subscribe(dish =>{
           this.dish =dish; this.dishcopy = dish;
