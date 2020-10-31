@@ -1,4 +1,4 @@
-import { Component, OnInit,Input, ViewChild, Inject } from '@angular/core';
+import { Component, OnInit, ViewChild, Inject } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Dish } from '../shared/dish';
 import { DishService } from '../services/dish.service';
@@ -7,15 +7,27 @@ import {formatDate} from '@angular/common';
 import { Location } from '@angular/common';
 import { switchMap } from 'rxjs/operators';
 import { Comments} from '../shared/comments';
-import { from } from 'rxjs';
+import { trigger, state, style, animate, transition, animation } from '@angular/animations';
 
 const comments = [];
 
 @Component({
   selector: 'app-dishdetail',
   templateUrl: './dishdetail.component.html',
-  styleUrls: ['./dishdetail.component.scss']
-  // animations: [myNgIfAnimation]
+  styleUrls: ['./dishdetail.component.scss'],
+  animations: [
+    trigger('visibility', [
+      state('shown', style({
+        transform: 'scale(1.0)',
+        opacity: 1
+      })),
+      state('hidden', style({
+        transform: 'scale(0.5)',
+        opacity: 0
+      })),
+      transition('* => *', animate('0.5s ease-in-out'))
+    ])
+  ]
 })
 export class DishdetailComponent implements OnInit {
 
@@ -27,18 +39,19 @@ export class DishdetailComponent implements OnInit {
   reviewForm: FormGroup;
   comments: Comments;
   dishcopy: Dish;
+  visibility = 'shown';
  
 
 
-  @ViewChild('fform') reviewFormDirective;
+  @ViewChild('fform') reviewFormDirective; 
 
   reviewErrors = {
-    'name':'',
+    'author':'',
     'comment':''
   };
 
   ValidationMessages ={
-    'name': {
+    'author': {
       'required':      'Name is required.',
       'minlength':     'Name must be at least 3 characters long.',
       'maxlength':     'Name cannot be more than 25 characters long.'
@@ -61,9 +74,9 @@ export class DishdetailComponent implements OnInit {
       this.commentsForm();
 
       this.dishservice.getDishIds().subscribe(dishIds => this.dishIds = dishIds);
-      this.route.params.pipe(switchMap((params: Params) => this.dishservice.getDish(params['id'])))
-      .subscribe(dish => { this.dish = dish; this.dishcopy = dish; this.setPrevNext(dish.id); }, 
-        errmess => this.errMess = <any>errmess );
+      this.route.params.pipe(switchMap((params: Params) => { this.visibility = 'hidden'; return this.dishservice.getDish(+params['id']); }))
+      .subscribe(dish => { this.dish = dish; this.dishcopy = dish; this.setPrevNext(dish.id); this.visibility = 'shown'; },
+        errmess => this.errMess = <any>errmess);
     }
     setPrevNext(dishId: string) {
       const index = this.dishIds.indexOf(dishId);
@@ -73,7 +86,7 @@ export class DishdetailComponent implements OnInit {
 
     commentsForm() {
       this.reviewForm = this.fb.group({
-        name: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(25)]],
+        author: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(25)]],
         rating: [5, Validators.required],
         comment: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(25)]],
         date:formatDate(new Date(), 'mediumDate', 'en')
