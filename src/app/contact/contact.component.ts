@@ -1,7 +1,10 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Feedback, ContactType } from '../shared/feedback';
+import { FeedbackService } from '../services/feedback.service';
+import {visibility , expand} from '../animations/app.animation';
 import { flyInOut } from '../animations/app.animation';
+import {Params, ActivatedRoute} from '@angular/router';
 
 @Component({
   selector: 'app-contact',
@@ -12,7 +15,9 @@ import { flyInOut } from '../animations/app.animation';
     'style': 'display: block;'
     },
     animations: [
-      flyInOut()
+      flyInOut(),
+      visibility(),
+      expand()
     ]
 })
 export class ContactComponent implements OnInit {
@@ -21,6 +26,12 @@ export class ContactComponent implements OnInit {
   feedbackForm: FormGroup;
   feedback: Feedback;
   contactType = ContactType;
+  visibility = 'hidden';
+  errMess: string;
+  test: boolean;
+  feedbackcopy: Feedback;
+  sv: boolean=false;
+
 
   formErrors = {
     'firstname': '',
@@ -50,7 +61,9 @@ export class ContactComponent implements OnInit {
     },
   };
 
-  constructor(private fb: FormBuilder) {
+  constructor(private fb: FormBuilder,
+    private fbs: FeedbackService,
+    private route: ActivatedRoute) {
     this.createForm();
   }
 
@@ -97,7 +110,15 @@ export class ContactComponent implements OnInit {
 
   onSubmit() {
     this.feedback = this.feedbackForm.value;
-    console.log(this.feedback);
+    this.fbs.submitFeedback(this.feedback)
+    .subscribe(feedback=>{ this.feedbackcopy = feedback;this.visibility = 'shown'; this.test = false;},errmess =>this.formErrors =<any>errmess);this.feedbackcopy = null;
+    { setTimeout(() => 
+      {
+        this.feedback = this.feedback; this.sv = false; 
+        setTimeout(() => this.feedback = null, 5000);
+      }
+      , 6000);
+    };
     this.feedbackForm.reset({
       firstname: '',
       lastname: '',
@@ -107,7 +128,7 @@ export class ContactComponent implements OnInit {
       contacttype: 'None',
       message: ''
     });
-    this.feedbackFormDirective.resetForm();
+    // this.feedbackFormDirective.resetForm();
   }
 
 }

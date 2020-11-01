@@ -1,12 +1,11 @@
-import { Component, OnInit } from '@angular/core';
-import { from } from 'rxjs';
-import { LEADERS } from '../shared/leaders'
+import { Component, OnInit,Inject } from '@angular/core';
 import { LeaderService} from '../services/leader.service';
 import { Leader } from '../shared/leader';
 
 import { Params, ActivatedRoute } from '@angular/router';
 import { Location } from '@angular/common';
 import { flyInOut, expand } from '../animations/app.animation';
+import { inject } from '@angular/core/testing';
 
 @Component({
   selector: 'app-about',
@@ -27,7 +26,8 @@ export class AboutComponent implements OnInit {
 
   constructor(private leaderservice: LeaderService,
     private route: ActivatedRoute,
-    private location: Location) { }
+    private location: Location,
+    @Inject('BaseURL') public BaseURL) { }
 
   ngOnInit(): void {
     this.leaderservice.getLeaders()

@@ -1,25 +1,43 @@
 import { Injectable } from '@angular/core';
 import { Promotion } from '../shared/promotion';
-import { PROMOTIONS } from '../shared/promotions';
-import { Observable, of } from 'rxjs';
-import { delay } from 'rxjs/operators'
-
+import { from, Observable, of } from 'rxjs';
+import { delay } from 'rxjs/operators';
+import { ProcessHTTPMsgService } from './process-httpmsg.service';
+import { HttpHeaders } from '@angular/common/http';
+import { baseURL } from '../shared/baseurl';
+import { HttpClient } from '@angular/common/http';
+import { map, catchError } from 'rxjs/operators';
+ 
 @Injectable({
   providedIn: 'root'
 })
 export class PromotionService {
 
-  constructor() { }
+  constructor( private http: HttpClient,
+    private ProcessHTTPMsgService: ProcessHTTPMsgService) { }
 
   getPromotions(): Observable<Promotion[]> {
-    return of(PROMOTIONS).pipe(delay(2000));
+    return this.http.get<Promotion[]>(baseURL + 'promotions').pipe(catchError(this.ProcessHTTPMsgService.handleError));
   }
 
   getPromotion(id: string): Observable<Promotion> {
-    return of(PROMOTIONS.filter((promo) => (promo.id === id))[0]).pipe(delay(2000));
+    return this.http.get<Promotion>(baseURL + 'promotions/' + id).pipe(catchError(this.ProcessHTTPMsgService.handleError));
   }
 
   getFeaturedPromotion(): Observable<Promotion> {
-    return of(PROMOTIONS.filter((promotion) => promotion.featured)[0]).pipe(delay(2000));
+    return this.http.get<Promotion[]>(baseURL + 'Promotions?featured=true').pipe(map(Promotions => Promotions[0])).pipe(catchError(this.ProcessHTTPMsgService.handleError));
+  }
+  getPromotionIds(): Observable<number[] | any> {
+    return this.getPromotions().pipe(map(Promotions => Promotions.map(promotion => promotion.id)))
+      .pipe(catchError(error => error));
+  }
+  putPromotion(promotion: Promotion): Observable<Promotion> {
+    const httpOptions = {
+      headers: new HttpHeaders({
+        'Content-Type':  'application/json'
+      })
+    };
+    return this.http.put<Promotion>(baseURL + 'promotions/' + promotion.id, promotion, httpOptions)
+      .pipe(catchError(this.ProcessHTTPMsgService.handleError));
   }
 }

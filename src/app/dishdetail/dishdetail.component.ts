@@ -115,19 +115,7 @@ export class DishdetailComponent implements OnInit {
     }
       
 
-    // onSubmit() {
-     
-    //   comments.push( this.reviewForm.value );
-    //   console.log(this.reviewForm.value)
-    //   this.reviewForm.reset({
-    //     name: '',
-    //     rating: 5,
-    //     comment: '',
-    //     date:formatDate(new Date(), 'mediumDate', 'en')
-    //   });
-    //   this.reviewFormDirective.resetForm();
-    // }
-
+ 
     onSubmit() {
       this.comment = this.reviewForm.value;
       this.comment.date = new Date().toISOString();
