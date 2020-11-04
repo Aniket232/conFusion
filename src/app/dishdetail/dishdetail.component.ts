@@ -74,7 +74,8 @@ export class DishdetailComponent implements OnInit {
       .subscribe(dish => { this.dish = dish; this.dishcopy = dish; this.setPrevNext(dish.id); this.visibility = 'shown'; },
         errmess => this.errMess = <any>errmess);
     }
-    setPrevNext(dishId: string) {
+
+    setPrevNext(dishId: string){
       const index = this.dishIds.indexOf(dishId);
       this.prev = this.dishIds[(this.dishIds.length + index - 1) % this.dishIds.length];
       this.next = this.dishIds[(this.dishIds.length + index + 1) % this.dishIds.length];
